@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WARZONE V3 - ROBLOX STYLE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0f1e;color:#fff;font-family:Arial}
+#wrap{max-width:580px;margin:auto;height:100dvh;display:flex;flex-direction:column}
+.topbar{display:flex;justify-content:space-between;padding:8px;background:#111827;font-weight:900;font-size:12px}
+.topbar span{color:#facc15}
+canvas{width:100%;flex:1;background:#4ade80;display:block}
+.panel{background:#111827;padding:6px;display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.btn{background:#2563eb;color:#fff;border:none;padding:9px 10px;border-radius:10px;font-weight:900;font-size:12px}
+.btn.green{background:#16a34a}.btn.red{background:#dc2626}.btn.yellow{background:#facc15;color:#000}.btn.purple{background:#9333ea}
+.shop{background:#1f2937;padding:6px;display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:240px;overflow:auto}
+.card{background:#374151;border-radius:10px;padding:7px;font-size:11px;line-height:1.4}
+.card.mythic{border:2px solid #facc15}.card.legendary{border:2px solid #a855f7}.card.epic{border:2px solid #38bdf8}
+#lobby{position:fixed;inset:0;background:linear-gradient(#0a0f1e,#1e3a8a);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;overflow:auto}
+input{width:100%;max-width:320px;padding:11px;border-radius:12px;border:none;text-align:center;margin:5px 0}
+#hud{position:fixed;top:58px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:8px 14px;border-radius:99px;font-weight:900;z-index:50;display:none}
+#winScreen{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#bossBar{height:14px;background:#1f2937;display:none;margin:4px 10px;border-radius:99px;overflow:hidden}
+#bossBarInner{height:100%;background:linear-gradient(90deg,#ef4444,#facc15);width:100%}
+</style>
+</head>
+<body>
+<div id="hud"></div>
+<div id="lobby">
+<div style="font-size:70px">🏝️🏰⚔️</div>
+<h1>WARZONE V3<br><span style="color:#facc15">ROBLOX STYLE</span></h1>
+<p>By Fawzan • Pulau • Upgrade LV 5 • Mythic</p>
+<input id="playerName" value="Fawzan" placeholder="Nama Kamu">
+<input id="roomCode" placeholder="Kode Room">
+<button class="btn yellow" onclick="buatRoom()">🎲 BUAT ROOM</button>
+<p style="margin:8px 0">PILIH MODE:</p>
+<button class="btn green" style="width:100%;max-width:320px;margin:3px 0" onclick="pilihMode('EASY',this)">😊 EASY</button>
+<button class="btn" style="width:100%;max-width:320px;margin:3px 0" onclick="pilihMode('MEDIUM',this)">😐 MEDIUM</button>
+<button class="btn yellow" style="width:100%;max-width:320px;margin:3px 0" onclick="pilihMode('HARD',this)">😤 HARD</button>
+<button class="btn red" style="width:100%;max-width:320px;margin:3px 0" onclick="pilihMode('NIGHTMARE',this)">💀 NIGHTMARE</button>
+<button class="btn purple" style="width:100%;max-width:320px;margin:3px 0" onclick="pilihMode('INFINITY',this)">♾️ INFINITY</button>
+<p id="modeInfo" style="color:#facc15">Mode: MEDIUM</p>
+<label><input type="checkbox" id="mabarCheck" style="width:auto"> MABAR 2 Player</label><br>
+<label><input type="checkbox" id="autoSkip" style="width:auto"> ⏩ Auto Skip Wave</label>
+<button class="btn red" style="width:100%;max-width:320px;padding:14px;margin-top:8px" onclick="mulaiGame()">▶ PLAY! MASUK PULAU 🏝️</button>
+<p style="font-size:11px;opacity:.6">Redeem: FAWZANOP, WARZONE100, BOSS30, MABAR2026, SULTAN, MYTHIC</p>
+</div>
+<div id="winScreen"><div style="font-size:80px">🏆🎉👑</div><h1 style="color:#facc15">VICTORY!</h1><p id="winText">Kamu menang!</p><button class="btn yellow" style="padding:14px 20px;margin-top:10px" onclick="location.reload()">🔄 MAIN LAGI</button></div>
+<div id="wrap">
+<div class="topbar"><div>💰 <span id="gold">600</span> | ❤️ <span id="hp">20</span></div><div>🌊 <span id="wave">0</span>/30 • LV <span id="level">1</span></div><div id="weather">☀️ Siang</div></div>
+<div id="bossBar"><div id="bossBarInner"></div></div>
+<div style="text-align:center;font-size:11px;background:#7f1d1d;padding:3px" id="bossName">🏝️ Pulau Warzone - Siap Perang!</div>
+<canvas id="cv" width="580" height="360"></canvas>
+<div class="panel">
+<button class="btn" onclick="startWave()">▶ START WAVE</button>
+<button class="btn" onclick="toggleSpeed()">⏩ SPEED <span id="speedTxt">x1</span></button>
+<button class="btn yellow" onclick="toggleMusic()">🎵 LAGU</button>
+<button class="btn purple" onclick="rebirth()">♻️ REBIRTH</button>
+<button class="btn red" onclick="location.reload()">🏠 LOBBY</button>
+</div>
+<div style="display:flex;gap:5px;padding:5px;background:#111827"><input id="redeemInput" placeholder="Kode Redeem... FAWZANOP" style="flex:1;margin:0"><button class="btn green" onclick="redeem()">REDEEM 🎁</button></div>
+<div style="display:flex;gap:5px;padding:0 5px 5px;background:#111827;justify-content:center;font-size:11px">🎯 Target: <select id="targetMode" onchange="changeTarget(this.value)"><option value="first">First</option><option value="last">Last</option><option value="strong">Strong</option><option value="weak">Weak</option></select><span id="turnTxt">P1</span></div>
+<div class="shop" id="shop"></div>
+<div style="text-align:center;font-size:11px;padding:6px;background:#111827">Rebirth: <span id="rb">0</span>x • <span id="selInfo">Pilih tower lalu ketuk pulau!</span></div>
+<div style="display:flex;gap:5px;padding:5px;background:#1f2937;justify-content:center"><button class="btn yellow" onclick="upgradeTower()">⬆️ UPGRADE (<span id="upCost">-</span>)</button><button class="btn red" onclick="jualTower()">💰 JUAL (<span id="sellCost">-</span>)</button><button class="btn purple" onclick="rotateTower()">🔄 ROTATE</button></div>
+</div>
+<audio id="warMusic" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3"></audio>
+<script>
+let cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let gold=600,hp=20,wave=0,level=1,rbCount=0,mode='MEDIUM',mult=1,selected='pistol',selTower=null,mabar=false,turn=1,enemies=[],towers=[],bullets=[],parts=[],weather='Cerah',isNight=false,started=false,speed=1,targetMode='first',autoSkip=false,usedCodes=[];
+let path=[{x:-20,y:80},{x:180,y:80},{x:180,y:180},{x:400,y:180},{x:400,y:280},{x:600,y:280}];
+let WEAPONS={pistol:{name:'Pistol',rar:'Common',price:50,dmg:9,rate:380,range:85,dur:100,emoji:'🔫',color:'#94a3b8',cls:''},rifle:{name:'Rifle',rar:'Common',price:120,dmg:16,rate:340,range:105,dur:150,emoji:'🎯',color:'#22c55e',cls:''},archer:{name:'Archer',rar:'Rare',price:180,dmg:20,rate:480,range:98,dur:180,emoji:'🏹',color:'#84cc16',cls:''},shotgun:{name:'Shotgun',rar:'Rare',price:280,dmg:38,rate:800,range:72,dur:200,emoji:'💥',color:'#f97316',cls:''},ice:{name:'Ice Gun',rar:'Epic',price:350,dmg:22,rate:600,range:92,dur:220,emoji:'❄️',color:'#38bdf8',cls:'epic'},cannon:{name:'Cannon',rar:'Epic',price:420,dmg:60,rate:1000,range:88,dur:260,emoji:'🔥',color:'#ef4444',cls:'epic'},laser:{name:'Laser',rar:'Legendary',price:750,dmg:95,rate:270,range:135,dur:360,emoji:'⚡',color:'#a855f7',cls:'legendary'},sultan:{name:'SULTAN GOLD',rar:'MYTHIC',price:1300,dmg:190,rate:240,range:155,dur:999,emoji:'👑',color:'#facc15',cls:'mythic'}};
+let BOSS={5:'👹 Goblin Raja',10:'🧛 Vampire Lord',15:'🥷 Ninja Bayangan',20:'🧌 Raksasa Ogre',25:'🧙 Penyihir Hitam',30:'👑 DARK LORD'};
+function showMsg(t){let e=document.getElementById('hud');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+function renderShop(){let h='';for(let k in WEAPONS){let w=WEAPONS[k];h+=`<div class="card ${w.cls}"><b>${w.emoji} ${w.name}</b> - ${w.rar}<br>💰 ${w.price}<br><span style="color:#facc15">DMG ${w.dmg} • RNG ${w.range}</span><br><button class="btn green" onclick="pilihSenjata('${k}')">PASANG</button></div>`}document.getElementById('shop').innerHTML=h}renderShop();
+function pilihMode(m,el){mode=m;mult={EASY:0.6,MEDIUM:1,HARD:1.6,NIGHTMARE:2.5,INFINITY:3}[m];gold=m=='EASY'?900:m=='NIGHTMARE'?350:600;document.getElementById('modeInfo').textContent='Mode: '+m;updateHUD()}
+function buatRoom(){let c='ROOM-'+Math.floor(Math.random()*9000+1000);document.getElementById('roomCode').value=c;showMsg('Room: '+c)}
+function mulaiGame(){mabar=document.getElementById('mabarCheck').checked;autoSkip=document.getElementById('autoSkip').checked;document.getElementById('lobby').style.display='none';started=true;document.getElementById('warMusic').play().catch(()=>{});showMsg('Selamat datang di Pulau! Mode '+mode);updateHUD();loop()}
+function pilihSenjata(k){selected=k;selTower=null;document.getElementById('selInfo').textContent='Pilih: '+WEAPONS[k].name;showMsg(WEAPONS[k].emoji+' '+WEAPONS[k].name+' dipilih!')}
+function changeTarget(v){targetMode=v;showMsg('Target: '+v)}
+function toggleSpeed(){speed=speed==1?2:1;document.getElementById('speedTxt').textContent='x'+speed}
+function toggleMusic(){let a=document.getElementById('warMusic');a.paused?a.play():a.pause()}
+function upgradeTower(){if(!selTower)return showMsg('Ketuk tower dulu!');if(selTower.lvl>=5)return showMsg('UDAH MAX LV 5!');let c=100*selTower.lvl+50;if(gold<c)return showMsg('Gold kurang! Butuh '+c);gold-=c;selTower.lvl++;selTower.dmg*=1.65;selTower.range+=10;selTower.dur+=80;showMsg('⬆️ LV '+selTower.lvl);updateHUD()}
+function jualTower(){if(!selTower)return showMsg('Ketuk tower dulu!');let back=Math.floor(selTower.price*0.7+selTower.lvl*40);gold+=back;towers.splice(towers.indexOf(selTower),1);showMsg('💰 +'+back+' Gold!');selTower=null;updateHUD()}
+function rotateTower(){if(!selTower)return showMsg('Ketuk tower dulu!');selTower.angle=(selTower.angle||0)+45;showMsg('🔄 Diputer!')}
+function rebirth(){if(level<10)return showMsg('Rebirth butuh LV 10!');rbCount++;level=1;wave=0;gold=600;hp=20;towers=[];enemies=[];showMsg('♻️ REBIRTH!');updateHUD()}
+function redeem(){let code=document.getElementById('redeemInput').value.trim().toUpperCase();if(!code)return;if(usedCodes.includes(code))return showMsg('Udah dipake!');let R={FAWZANOP:2000,WARZONE100:1000,BOSS30:1500,MABAR2026:800,SULTAN:1200,MYTHIC:2500};if(!R[code])return showMsg('Kode salah! Coba FAWZANOP');usedCodes.push(code);gold+=R[code];if(code=='FAWZANOP')towers.forEach(t=>t.dmg*=1.5);showMsg('🎁 +'+R[code]+' Gold!');document.getElementById('redeemInput').value='';updateHUD()}
+function updateHUD(){document.getElementById('gold').textContent=Math.floor(gold);document.getElementById('hp').textContent=hp;document.getElementById('wave').textContent=wave;document.getElementById('level').textContent=level;document.getElementById('rb').textContent=rbCount;document.getElementById('turnTxt').textContent=mabar?('P'+turn):'Solo';if(selTower){document.getElementById('upCost').textContent=selTower.lvl>=5?'MAX':(100*selTower.lvl+50);document.getElementById('sellCost').textContent=Math.floor(selTower.price*0.7+selTower.lvl*40)}}
+function startWave(){if(enemies.length>0)return showMsg('Wave masih jalan!');wave++;let isBoss=wave%5==0;if(isBoss){let bh=(600+wave*240)*mult;document.getElementById('bossBar').style.display='block';document.getElementById('bossName').textContent='⚠️ '+BOSS[wave]+' DATANG!';enemies.push({x:-30,y:path[0].y,pathIdx:0,hp:bh,maxHp:bh,speed:0.7,type:'boss',slow:0,walk:0});showMsg('💀 BOSS WAVE '+wave)}else{let count=4+wave*2;document.getElementById('bossBar').style.display='none';document.getElementById('bossName').textContent='🌊 Wave '+wave;for(let i=0;i<count;i++){let t=Math.random()<0.25?'fast':Math.random()<0.15?'tank':'normal';let h=(55+wave*32)*mult*(t=='fast'?0.6:t=='tank'?2:1);enemies.push({x:-20-i*34,y:path[0].y,pathIdx:0,hp:h,maxHp:h,speed:t=='fast'?1.9:t=='tank'?0.8:1.15,type:t,slow:0,walk:0})}showMsg('🌊 Wave '+wave+'! '+count+' musuh!')}updateHUD()}
+cv.addEventListener('click',e=>{if(!started)return;let r=cv.getBoundingClientRect();let x=(e.clientX-r.left)*(cv.width/r.width);let y=(e.clientY-r.top)*(cv.height/r.height);for(let t of towers){if(Math.hypot(t.x-x,t.y-y)<30){selTower=t;document.getElementById('selInfo').textContent=t.name+' LV '+t.lvl+'/5 • DMG '+Math.floor(t.dmg);updateHUD();return}}let w=WEAPONS[selected];if(gold<w.price)return showMsg('Gold kurang!');towers.push({x,y,type:selected,name:w.name,rar:w.rar,price:w.price,lvl:1,dmg:w.dmg*(1+rbCount*0.25),range:w.range,rate:w.rate,last:0,dur:w.dur,emoji:w.emoji,color:w.color,angle:0});gold-=w.price;if(mabar)turn=turn==1?2:1;showMsg(w.name+' dipasang!');updateHUD()});
+setInterval(()=>{let arr=['Cerah','Hujan','Salju','Badai','Cerah'];weather=arr[Math.floor(Math.random()*arr.length)];isNight=!isNight;document.getElementById('weather').textContent=(isNight?'🌙 Malam':'☀️ Siang')+' '+(weather=='Hujan'?'🌧️':weather=='Salju'?'❄️':weather=='Badai'?'⛈️':'☀️')},9000);
+function drawHuman(x,y,type,isBoss,walk){let skin=type=='boss'?'#7f1d1d':type=='fast'?'#fde68a':type=='tank'?'#d1d5db':'#fca5a5';let shirt=type=='boss'?'#111827':type=='fast'?'#1e293b':type=='tank'?'#374151':'#7f1d1d';let s=isBoss?1.9:type=='tank'?1.35:1;let leg=Math.sin(walk)*4;ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(x,y+16*s,14*s,4,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1f2937';ctx.fillRect(x-8*s,y+6*s+leg,6*s,10*s);ctx.fillRect(x+2*s,y+6*s-leg,6*s,10*s);ctx.fillStyle=shirt;ctx.fillRect(x-10*s,y-6*s,20*s,14*s);ctx.fillStyle=skin;ctx.fillRect(x-14*s,y-4*s,5*s,10*s);ctx.fillRect(x+9*s,y-4*s,5*s,10*s);ctx.fillStyle=skin;ctx.beginPath();ctx.arc(x,y-12*s,9*s,0,Math.PI*2);ctx.fill();if(isBoss){ctx.fillStyle='#facc15';ctx.fillRect(x-11*s,y-22*s,22*s,6*s);ctx.font=(14*s)+'px Arial';ctx.textAlign='center';ctx.fillText('👑',x,y-26*s)}else{ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x,y-15*s,9*s,Math.PI,0);ctx.fill()}ctx.fillStyle='black';ctx.fillRect(x-4*s,y-13*s,2*s,2*s);ctx.fillRect(x+2*s,y-13*s,2*s,2*s)}
+function loop(){if(!started)return;ctx.fillStyle='#38bdf8';ctx.fillRect(0,0,cv.width,cv.height);ctx.fillStyle=isNight?'#1e293b':'#fde68a';ctx.beginPath();ctx.ellipse(290,180,285,175,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=isNight?'#334155':'#4ade80';ctx.beginPath();ctx.ellipse(290,180,258,148,0,0,Math.PI*2);ctx.fill();ctx.font='18px Arial';ctx.fillText('🌴',40,40);ctx.fillText('🌴',520,50);ctx.fillText('🏠',500,300);ctx.fillText('🌴',60,320);ctx.fillText('🏰',290,320);ctx.strokeStyle='#78350f';ctx.lineWidth=36;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(path[0].x,path[0].y);for(let p of path)ctx.lineTo(p.x,p.y);ctx.stroke();for(let t of towers){let target=null,best=9999;for(let en of enemies){let d=Math.hypot(t.x-en.x,t.y-en.y);if(d<t.range&&d<best){best=d;target=en}}if(target)t.angle=Math.atan2(target.y-t.y,target.x-t.x)*180/Math.PI;ctx.save();ctx.translate(t.x,t.y);let size=16+t.lvl*2;ctx.fillStyle=t.color;ctx.fillRect(-size,-size,size*2,size*2);ctx.fillStyle='#111';ctx.fillRect(-size,-size-7,size*2,7);ctx.rotate((t.angle||0)*Math.PI/180);ctx.fillStyle='#111';ctx.fillRect(0,-4,20+t.lvl*2,8);ctx.fillStyle='white';ctx.beginPath();ctx.arc(0,0,9,0,Math.PI*2);ctx.fill();ctx.font='16px Arial';ctx.textAlign='center';ctx.fillText(t.emoji,0,6);ctx.restore();ctx.font='bold 10px Arial';ctx.fillStyle='white';ctx.textAlign='center';ctx.fillText(t.name+' LV'+t.lvl+(t.lvl==5?' MAX':''),t.x,t.y+30);if(selTower==t){ctx.strokeStyle='#facc15';ctx.beginPath();ctx.arc(t.x,t.y,t.range,0,Math.PI*2);ctx.stroke()}}for(let s=0;s<speed;s++){for(let i=enemies.length-1;i>=0;i--){let en=enemies[i];en.walk+=0.2;let target=path[en.pathIdx+1];if(!target){enemies.splice(i,1);hp-=en.type=='boss'?4:1;if(hp<=0){alert('💀 KALAH! Coba FAWZANOP!');location.reload();return}updateHUD();continue}let dx=target.x-en.x,dy=target.y-en.y,d=Math.hypot(dx,dy);let sp=en.speed*(en.slow>0?0.5:1);en.x+=dx/d*sp;en.y+=dy/d*sp;if(en.slow>0)en.slow--;if(d<4)en.pathIdx++}for(let t of towers){if(Date.now()-t.last<t.rate)continue;let cand=enemies.filter(en=>Math.hypot(t.x-en.x,t.y-en.y)<t.range);if(cand.length==0)continue;let target=cand[0];if(targetMode=='first')target=cand.sort((a,b)=>b.pathIdx-a.pathIdx||b.x-a.x)[0];if(targetMode=='last')target=cand.sort((a,b)=>a.pathIdx-b.pathIdx)[0];if(targetMode=='strong')target=cand.sort((a,b)=>b.maxHp-a.maxHp)[0];if(targetMode=='weak')target=cand.sort((a,b)=>a.hp-b.hp)[0];t.last=Date.now();bullets.push({x:t.x,y:t.y,tx:target.x,ty:target.y,dmg:t.dmg,type:t.type});if(t.type=='ice')target.slow=60}}for(let en of enemies){drawHuman(en.x,en.y,en.type,en.type=='boss',en.walk);ctx.fillStyle='red';ctx.fillRect(en.x-18,en.y-36,36,5);ctx.fillStyle='lime';ctx.fillRect(en.x-18,en.y-36,36*(en.hp/en.maxHp),5);if(en.type=='boss')document.getElementById('bossBarInner').style.width=(en.hp/en.maxHp*100)+'%'}for(let i=bullets.length-1;i>=0;i--){let b=bullets[i];b.x+=(b.tx-b.x)*0.4;b.y+=(b.ty-b.y)*0.4;ctx.fillStyle=b.type=='laser'?'#a855f7':b.type=='sultan'?'#facc15':'#fff';ctx.beginPath();ctx.arc(b.x,b.y,5,0,Math.PI*2);ctx.fill();if(Math.hypot(b.x-b.tx,b.y-b.ty)<12){bullets.splice(i,1);for(let en of enemies){if(Math.hypot(en.x-b.tx,en.y-b.ty)<30){en.hp-=b.dmg;parts.push({x:en.x,y:en.y,c:'#facc15',life:14});if(en.hp<=0){let isBoss=en.type=='boss';gold+=isBoss?600:20+wave*5;enemies.splice(enemies.indexOf(en),1);if(isBoss){document.getElementById('bossBar').style.display='none';showMsg('🏆 BOSS KALAH! +600 Gold!')}if(enemies.length==0){if(wave>=30&&mode!='INFINITY'){menang()}else{wave++;if(wave%3==0)level++;showMsg('🎉 Wave clear! Next '+wave);updateHUD();if(autoSkip)setTimeout(startWave,800)}} }break}}}}for(let i=parts.length-1;i>=0;i--){let p=parts[i];ctx.fillStyle=p.c;ctx.fillRect(p.x+Math.random()*8-4,p.y+Math.random()*8-4,4,4);p.life--;if(p.life<=0)parts.splice(i,1)}if(weather=='Hujan'||weather=='Badai'){ctx.fillStyle='rgba(100,150,255,.5)';for(let i=0;i<22;i++)ctx.fillRect(Math.random()*cv.width,Math.random()*cv.height,2,10)}if(weather=='Salju'){ctx.fillStyle='white';for(let i=0;i<18;i++){ctx.beginPath();ctx.arc(Math.random()*cv.width,Math.random()*cv.height,3,0,Math.PI*2);ctx.fill()}}requestAnimationFrame(loop)}
+function menang(){started=false;document.getElementById('winText').textContent='Menang! Kalahin '+BOSS[30]+'! Mode '+mode;document.getElementById('winScreen').style.display='flex';for(let i=0;i<80;i++){setTimeout(()=>{let d=document.createElement('div');d.textContent=['🎉','🏆','✨','🎆','💰','🏝️'][Math.floor(Math.random()*6)];d.style.position='fixed';d.style.left=Math.random()*100+'vw';d.style.top=Math.random()*100+'vh';d.style.fontSize='30px';d.style.zIndex=300;document.body.appendChild(d);setTimeout(()=>d.remove(),2000)},i*30)}}
+</script>
+</body>
+</html>
