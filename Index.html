@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FISH IT! By Fawzan 🎣</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0a1628;color:#fff;font-family:Arial;overflow:hidden}
+#wrap{max-width:480px;margin:auto;height:100dvh;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;padding:9px 10px;background:#111827;font-weight:900;font-size:13px}
+.top span{color:#facc15}
+#pond{flex:1;position:relative;background:linear-gradient(#38bdf8 0%,#0ea5e9 35%,#0369a1 100%);overflow:hidden}
+#sun{position:absolute;top:14px;right:16px;font-size:38px}
+#cloud{position:absolute;top:10px;left:20px;font-size:28px}
+#boat{position:absolute;left:50%;transform:translateX(-50%);bottom:170px;font-size:54px}
+#bobber{position:absolute;left:50%;top:58%;font-size:32px;transform:translateX(-50%);display:none;transition:.2s}
+#bobber.bite{animation:shake .15s infinite}
+@keyframes shake{0%{transform:translateX(-50%) rotate(-15deg)}50%{transform:translateX(-50%) rotate(15deg)}100%{transform:translateX(-50%) rotate(-15deg)}}
+#bigMark{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);font-size:72px;display:none;z-index:10;animation:pop .3s infinite alternate}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.25)}}
+#fishCaught{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);text-align:center;display:none;z-index:20;background:rgba(0,0,0,.85);padding:14px 18px;border-radius:16px}
+#barWrap{position:absolute;left:12px;right:12px;bottom:88px;background:rgba(0,0,0,.6);padding:8px;border-radius:12px;display:none}
+#bar{height:18px;background:#1f2937;border-radius:99px;overflow:hidden}
+#barFill{height:100%;width:50%;background:linear-gradient(90deg,#22c55e,#facc15);transition:.1s}
+#zone{position:absolute;top:-2px;height:22px;background:rgba(255,255,255,.9);border-radius:99px;width:28%}
+.controls{background:#111827;padding:8px;display:flex;gap:6px;justify-content:center}
+.btn{border:none;padding:13px 12px;border-radius:12px;font-weight:900;font-size:13px;color:#fff;flex:1}
+.btn.blue{background:#2563eb}.btn.green{background:#16a34a}.btn.yellow{background:#facc15;color:#000}.btn.red{background:#dc2626}.btn.purple{background:#9333ea}
+.shop{background:#1f2937;padding:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:190px;overflow:auto}
+.card{background:#374151;border-radius:10px;padding:8px;font-size:11px;line-height:1.5}
+.card.mythic{border:2px solid #facc15}.card.legendary{border:2px solid #a855f7}
+#lobby{position:fixed;inset:0;background:linear-gradient(#0a1628,#0ea5e9);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center}
+input{width:100%;max-width:320px;padding:11px;border-radius:12px;border:none;text-align:center;margin:5px 0}
+#hud{position:fixed;top:55px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);padding:9px 14px;border-radius:99px;font-weight:900;z-index:50;display:none;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="hud"></div>
+<div id="lobby">
+<div style="font-size:70px">🎣🐟🌊</div>
+<h1>FISH IT!<br><span style="color:#facc15">By Fawzan</span></h1>
+<p>Mancing • Jual Ikan • Jadi Sultan!</p>
+<input id="playerName" value="Fawzan" placeholder="Nama Kamu">
+<button class="btn yellow" style="width:100%;max-width:320px;padding:14px;margin-top:8px" onclick="mulaiGame()">▶ PLAY! MANCING 🎣</button>
+<p style="font-size:11px;margin-top:8px;opacity:.8">Redeem: FAWZANOP, IKAN100<br>Tips: Pencet TARIK pas muncul ❗</p>
+</div>
+<div id="wrap">
+<div class="top"><div>💰 <span id="gold">100</span> | 🐟 <span id="fishCount">0</span></div><div>🎣 <span id="rodName">Kayu</span></div><div>⭐ Lv <span id="level">1</span></div></div>
+<div id="pond">
+<div id="sun">☀️</div><div id="cloud">☁️ ☁️</div>
+<div id="boat">🧑‍🎣</div>
+<div id="bobber">🛟</div>
+<div id="bigMark">❗</div>
+<div id="fishCaught"><div id="caughtEmoji" style="font-size:50px">🐟</div><b id="caughtName">Ikan</b><br><span id="caughtPrice" style="color:#facc15">+0</span><br><button class="btn green" style="margin-top:8px" onclick="tutupCaught()">OK 👍</button></div>
+<div id="barWrap"><div style="text-align:center;font-size:12px;font-weight:900;margin-bottom:4px">JAGA GARIS HIJAU DI ZONA PUTIH! 👆 PENCET TERUS!</div><div id="bar"><div id="zone"></div><div id="barFill"></div></div></div>
+</div>
+<div class="controls">
+<button class="btn blue" id="castBtn" onclick="lempar()">🎣 LEMPAR</button>
+<button class="btn yellow" id="pullBtn" onclick="tarik()" style="display:none">❗ TARIK!</button>
+<button class="btn green" onclick="jualSemua()">💰 JUAL SEMUA</button>
+<button class="btn purple" onclick="location.reload()">🏠 LOBBY</button>
+</div>
+<div style="display:flex;gap:5px;padding:5px;background:#111827"><input id="redeemInput" placeholder="Kode: FAWZANOP" style="flex:1;margin:0"><button class="btn green" onclick="redeem()" style="flex:none;padding:10px">REDEEM 🎁</button></div>
+<div class="shop" id="shop"></div>
+<div style="text-align:center;font-size:11px;padding:6px;background:#111827">Tas: <span id="bagInfo">0/10</span> • Pencet JUAL kalo tas penuh! • Rod nambahin hoki!</div>
+</div>
+<audio id="bgMusic" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"></audio>
+<script>
+let gold=100,level=1,bag=[],rod='kayu',state='idle',biteTimer=null,fishTimer=null,barPos=50,barDir=1,currentFish=null,usedCodes=[],xp=0;
+let RODS={kayu:{name:'Kayu',price:0,luck:0,emoji:'🪵'},bambu:{name:'Bambu',price:150,luck:10,emoji:'🎋'},besi:{name:'Besi',price:400,luck:20,emoji:'🔩'},emas:{name:'Emas',price:1000,luck:35,emoji:'🏆'},sultan:{name:'SULTAN',price:2500,luck:55,emoji:'👑'}};
+let FISH=[
+{name:'Ikan Lele',emoji:'🐟',price:15,chance:30,rarity:'Biasa',color:'#94a3b8'},
+{name:'Ikan Nila',emoji:'🐠',price:25,chance:25,rarity:'Biasa',color:'#94a3b8'},
+{name:'Ikan Mas',emoji:'🐡',price:45,chance:18,rarity:'Langka',color:'#22c55e'},
+{name:'Ikan Koi',emoji:'🎏',price:80,chance:12,rarity:'Langka',color:'#22c55e'},
+{name:'Ikan Hiu',emoji:'🦈',price:180,chance:8,rarity:'Epic',color:'#38bdf8'},
+{name:'Ikan Paus',emoji:'🐳',price:350,chance:4,rarity:'Legendary',color:'#a855f7'},
+{name:'Ikan NAGA',emoji:'🐉',price:1000,chance:2,rarity:'MYTHIC',color:'#facc15'},
+{name:'Ikan SULTAN',emoji:'👑🐟',price:2500,chance:1,rarity:'MYTHIC',color:'#facc15'}];
+function showMsg(t){let e=document.getElementById('hud');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+function renderShop(){let h='';for(let k in RODS){let r=RODS[k];h+=`<div class="card ${k=='sultan'?'mythic':k=='emas'?'legendary':''}"><b>${r.emoji} Pancing ${r.name}</b><br>🍀 Hoki +${r.luck}%<br>💰 ${r.price==0?'GRATIS':r.price}<br>${rod==k?'<b style="color:#22c55e">✅ DIPAKE</b>':`<button class="btn blue" onclick="beliRod('${k}')">BELI / PAKE</button>`}</div>`}document.getElementById('shop').innerHTML=h}renderShop();
+function beliRod(k){if(rod==k)return;let r=RODS[k];if(r.price>0&&gold<r.price)return showMsg('Gold kurang! Jual ikan dulu!');if(r.price>0)gold-=r.price;rod=k;showMsg(r.emoji+' Pancing '+r.name+' dipake! Hoki naik!');updateHUD();renderShop()}
+function mulaiGame(){document.getElementById('lobby').style.display='none';document.getElementById('boat').textContent='🧑‍🎣 '+(document.getElementById('playerName').value||'Fawzan');showMsg('Selamat mancing! Pencet LEMPAR!');}
+function updateHUD(){document.getElementById('gold').textContent=gold;document.getElementById('fishCount').textContent=bag.length;document.getElementById('rodName').textContent=RODS[rod].name;document.getElementById('level').textContent=level;document.getElementById('bagInfo').textContent=bag.length+'/10'}
+function redeem(){let c=document.getElementById('redeemInput').value.trim().toUpperCase();if(!c)return;if(usedCodes.includes(c))return showMsg('Udah dipake!');let R={FAWZANOP:1000,IKAN100:500};if(!R[c])return showMsg('Kode salah!');usedCodes.push(c);gold+=R[c];showMsg('🎁 +'+R[c]+' Gold!');updateHUD()}
+function lempar(){if(state!='idle')return;if(bag.length>=10)return showMsg('Tas penuh! Jual dulu!');state='waiting';document.getElementById('bobber').style.display='block';document.getElementById('castBtn').textContent='⏳ Nunggu...';showMsg('Umpan dilempar... tunggu ❗');let wait=1500+Math.random()*2500;setTimeout(()=>{if(state!='waiting')return;state='bite';document.getElementById('bobber').classList.add('bite');document.getElementById('bigMark').style.display='block';document.getElementById('pullBtn').style.display='block';document.getElementById('castBtn').textContent='🎣 NUNGGU...';showMsg('❗ ADA IKAN! CEPET TARIK!');biteTimer=setTimeout(()=>{if(state=='bite'){gagal()}},1800)},wait)}
+function gagal(){state='idle';document.getElementById('bobber').style.display='none';document.getElementById('bobber').classList.remove('bite');document.getElementById('bigMark').style.display='none';document.getElementById('pullBtn').style.display='none';document.getElementById('castBtn').textContent='🎣 LEMPAR';showMsg('😭 Ikannya kabur! Lempar lagi!')}
+function tarik(){if(state!='bite')return;clearTimeout(biteTimer);state='fight';document.getElementById('bigMark').style.display='none';document.getElementById('pullBtn').style.display='none';document.getElementById('barWrap').style.display='block';document.getElementById('castBtn').textContent='⚔️ LAWAN!';let luck=RODS[rod].luck;let roll=Math.random()*100+luck;let pick=FISH[0];let total=0;for(let f of FISH){total+=f.chance;if(roll<=total){pick=f;break}}if(roll>95)pick=FISH[7];currentFish=pick;barPos=50;barDir=1;fishTimer=setInterval(fightTick,50)}
+function fightTick(){barPos+=barDir*3.2;if(barPos>95)barDir=-1;if(barPos<5)barDir=1;let zone=document.getElementById('zone');let zonePos=35+Math.sin(Date.now()/300)*20;zone.style.left=zonePos+'%';document.getElementById('barFill').style.width=barPos+'%';let diff=Math.abs(barPos-(zonePos+14));if(diff<14){xp+=1;document.getElementById('barFill').style.background='#22c55e'}else{document.getElementById('barFill').style.background='#ef4444'}if(xp>=18){menang()}if(xp<=-5){gagalFight()}}
+function menang(){clearInterval(fishTimer);xp=0;state='idle';bag.push(currentFish);document.getElementById('barWrap').style.display='none';document.getElementById('bobber').style.display='none';document.getElementById('bobber').classList.remove('bite');document.getElementById('castBtn').textContent='🎣 LEMPAR';document.getElementById('caughtEmoji').textContent=currentFish.emoji;document.getElementById('caughtName').textContent=currentFish.name+' - '+currentFish.rarity;document.getElementById('caughtPrice').textContent='Harga jual: 💰 '+currentFish.price;document.getElementById('fishCaught').style.display='block';if(currentFish.rarity=='MYTHIC')showMsg('👑👑 MYTHIC!! GILA!!');level=Math.floor(bag.length/3)+1;updateHUD()}
+function gagalFight(){clearInterval(fishTimer);xp=0;state='idle';document.getElementById('barWrap').style.display='none';document.getElementById('bobber').style.display='none';document.getElementById('castBtn').textContent='🎣 LEMPAR';showMsg('😭 Lepas! Jaga di zona putih!')}
+function tutupCaught(){document.getElementById('fishCaught').style.display='none'}
+function jualSemua(){if(bag.length==0)return showMsg('Tas kosong! Mancing dulu!');let total=bag.reduce((a,b)=>a+b.price,0);gold+=total;showMsg('💰 Terjual! +'+total+' Gold!');bag=[];updateHUD()}
+document.getElementById('pond').addEventListener('touchstart',()=>{if(state=='fight'){xp+=2;barPos+=4}});
+document.getElementById('pond').addEventListener('click',()=>{if(state=='fight'){xp+=2;barPos+=4}});
+updateHUD();
+</script>
+</body>
+</html>
